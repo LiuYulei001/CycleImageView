@@ -72,25 +72,23 @@
 }
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
+    NSInteger currentPage = 0;
+    
     if (!self.movementDirection) {
         
-        NSInteger currentPage = scrollView.contentOffset.x / scrollView.bounds.size.width;
-        currentPage = currentPage % self.images.count;
+        currentPage = scrollView.contentOffset.x / scrollView.bounds.size.width;
         
-        self.pageControl.currentPage = currentPage;
-        _index = currentPage;
-        
-        [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:currentPage inSection:1] atScrollPosition:_scrollPosition animated:NO];
-    }else
+    } else
     {
-        NSInteger currentPage = scrollView.contentOffset.y / scrollView.bounds.size.height;
-        currentPage = currentPage % self.images.count;
-        
-        self.pageControl.currentPage = currentPage;
-        _index = currentPage;
-        
-        [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:currentPage inSection:1] atScrollPosition:_scrollPosition animated:NO];
+        currentPage = scrollView.contentOffset.y / scrollView.bounds.size.height;
     }
+    
+    currentPage = currentPage % self.images.count;
+    
+    self.pageControl.currentPage = currentPage;
+    _index = currentPage;
+    
+    [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:currentPage inSection:1] atScrollPosition:_scrollPosition animated:NO];
 }
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
