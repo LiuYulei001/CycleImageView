@@ -19,10 +19,21 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
-    CycleImageView *cycleImageView = [[CycleImageView alloc]initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 250)];
+    CycleImageView *cycleImageView = [[CycleImageView alloc]initWithFrame:CGRectMake(0, 100, self.view.bounds.size.width, 200)];
     cycleImageView.images = @[[UIImage imageNamed:@"1"],[UIImage imageNamed:@"2"],[UIImage imageNamed:@"3"]];
     cycleImageView.delegate = self;
+    
+    
+    CycleImageView *cycleImageView2 = [[CycleImageView alloc]initWithFrame:CGRectMake(0, CGRectGetMaxY(cycleImageView.frame) + 30, self.view.bounds.size.width, 200)];
+    cycleImageView2.movementDirection = MovementDirectionVertically;
+    cycleImageView2.timeInterval = 0.5;
+    cycleImageView2.images = @[[UIImage imageNamed:@"1"],[UIImage imageNamed:@"2"],[UIImage imageNamed:@"3"]];
+    cycleImageView2.hidePageControl = YES;
+    cycleImageView2.canFingersSliding = NO;
+    
+    
     [self.view addSubview:cycleImageView];
+    [self.view addSubview:cycleImageView2];
 }
 
 #pragma mark - CycleImageViewDelegate

@@ -18,6 +18,8 @@
 {
     NSInteger _index;
     BOOL _isScrol;
+    UICollectionViewScrollPosition _scrollPosition;
+    UICollectionViewScrollDirection _scrollDirection;
 }
 
 @property(nonatomic,strong)UICollectionView *collectionView;
@@ -31,6 +33,8 @@
 - (instancetype)initWithFrame:(CGRect)frame
 {
     if (self = [super initWithFrame:frame]) {
+        
+        self.movementDirection = MovementDirectionForHorizontally;
         
     }
     return self;
@@ -62,19 +66,31 @@
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
 {
     if (_isScrol) {
-        [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:1] atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:NO];
+        [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:1] atScrollPosition:_scrollPosition animated:NO];
         _isScrol = NO;
     }
 }
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
-    NSInteger currentPage = scrollView.contentOffset.x / scrollView.bounds.size.width;
-    currentPage = currentPage % self.images.count;
-    
-    self.pageControl.currentPage = currentPage;
-    _index = currentPage;
-    
-    [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:currentPage inSection:1] atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:NO];
+    if (!self.movementDirection) {
+        
+        NSInteger currentPage = scrollView.contentOffset.x / scrollView.bounds.size.width;
+        currentPage = currentPage % self.images.count;
+        
+        self.pageControl.currentPage = currentPage;
+        _index = currentPage;
+        
+        [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:currentPage inSection:1] atScrollPosition:_scrollPosition animated:NO];
+    }else
+    {
+        NSInteger currentPage = scrollView.contentOffset.y / scrollView.bounds.size.height;
+        currentPage = currentPage % self.images.count;
+        
+        self.pageControl.currentPage = currentPage;
+        _index = currentPage;
+        
+        [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:currentPage inSection:1] atScrollPosition:_scrollPosition animated:NO];
+    }
 }
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -86,7 +102,7 @@
 #pragma mark - timer action
 - (void)startTimer
 {
-    self.timer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(timerCycleImageAction:) userInfo:nil repeats:YES];
+    self.timer = [NSTimer scheduledTimerWithTimeInterval:(self.timeInterval ? self.timeInterval : 1) target:self selector:@selector(timerCycleImageAction:) userInfo:nil repeats:YES];
     [[NSRunLoop currentRunLoop] addTimer:self.timer forMode:NSRunLoopCommonModes];
 }
 - (void)stopTimer
@@ -98,25 +114,50 @@
 {
     if (_index == self.images.count) {
         
-        [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:2] atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
+        [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:2] atScrollPosition:_scrollPosition animated:YES];
         self.pageControl.currentPage = 0;
         _index = 1;
         _isScrol = YES;
         
     }else
     {
-        [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:_index inSection:1] atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:YES];
+        [self.collectionView scrollToItemAtIndexPath:[NSIndexPath indexPathForRow:_index inSection:1] atScrollPosition:_scrollPosition animated:YES];
         self.pageControl.currentPage = _index;
         _index += 1;
     }
 }
 #pragma mark - setter
+- (void)setMovementDirection:(MovementDirectionType)movementDirection
+{
+    _movementDirection = movementDirection;
+    
+    if (!movementDirection) {
+        
+        _scrollPosition = UICollectionViewScrollPositionCenteredHorizontally;
+        _scrollDirection = UICollectionViewScrollDirectionHorizontal;
+        
+    }else
+    {
+        _scrollPosition = UICollectionViewScrollPositionCenteredVertically;
+        _scrollDirection = UICollectionViewScrollDirectionVertical;
+    }
+}
 - (void)setImages:(NSArray *)images
 {
     _images = images;
     [self.collectionView reloadData];
     self.pageControl.numberOfPages = images.count;
     [self startTimer];
+}
+- (void)setHidePageControl:(BOOL)hidePageControl
+{
+    _hidePageControl = hidePageControl;
+    self.pageControl.hidden = hidePageControl;
+}
+- (void)setCanFingersSliding:(BOOL)canFingersSliding
+{
+    _canFingersSliding = canFingersSliding;
+    self.collectionView.scrollEnabled = canFingersSliding;
 }
 #pragma mark - getter
 - (CycleImageViewPageControl *)pageControl
@@ -138,7 +179,7 @@
         
         UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc]init];
         
-        flowLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+        flowLayout.scrollDirection = _scrollDirection;
         flowLayout.itemSize = self.bounds.size;
         flowLayout.minimumLineSpacing = 0;
         flowLayout.minimumInteritemSpacing = 0;
@@ -147,6 +188,7 @@
         
         _collectionView.pagingEnabled = YES;
         _collectionView.showsHorizontalScrollIndicator = NO;
+        _collectionView.showsVerticalScrollIndicator = NO;
         _collectionView.bounces = NO;
         _collectionView.dataSource = self;
         _collectionView.delegate = self;
@@ -158,7 +200,7 @@
         [self addSubview:_collectionView];
         
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:1];
-        [_collectionView scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionCenteredHorizontally animated:NO];
+        [_collectionView scrollToItemAtIndexPath:indexPath atScrollPosition:_scrollPosition animated:NO];
         
     }
     return _collectionView;
