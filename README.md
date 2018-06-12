@@ -5,6 +5,25 @@
 
 UICollectionView、UICollectionViewCell、UIPageControl、NSTimer
 
+参数：
+
+//滑动方向：垂直、水平
+
+@property(nonatomic,assign)MovementDirectionType movementDirection;
+
+//自动滚动间隔时间
+
+@property(nonatomic,assign)NSTimeInterval timeInterval;
+
+//隐藏pageControl
+
+@property(nonatomic,assign)BOOL hidePageControl;
+
+//是否允许手动滑动
+
+@property(nonatomic,assign)BOOL canFingersSliding;
+
+
 用法：
 
 导入头文件#import "CycleImageView.h"
